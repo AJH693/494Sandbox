@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block header_css %}
+<head>
+    <title>Personal Gradebook - Student</title>
+    {{ super() }}
+</head>
+{% endblock %}
+{% block body %}
+<div class= "row">
+	<div id= "coursePanels" class="col-md-8 col-md-offset-2">
+		<div class="list-group">
+			<li class="list-group-item active" align="center"><strong>Courses</strong></li>
+	        {% for course in courses %}
+	            <li class="list-group-item">	
+	            	<a href="/gradebook/courseGrades/{{1000 + course.id}}">{{course.name}}</a>
+	            </li>		
+	        {% endfor %}
+		</div>
+	</div>
+</div>
+
+{% endblock %}

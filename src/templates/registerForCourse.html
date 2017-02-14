@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% block header_css %}
+<head>
+    <title>Register For Course</title>
+    {{ super() }}
+</head>
+{% endblock %}
+{% block body %}
+<br>
+<div class="col-md-4 col-md-offset-3">
+    <h2>Register For Course</h2>
+    <form role="form", method="POST" enctype="multipart/form-data">
+      <input id="courseName" type="text" name="courseName" class="form-control" placeholder="Course Name" required autofocus><br>
+      </div>
+    </form>
+</div>
+<div id="courseSearchResults" class="col-md-4 col-md-offset-3">
+  <table id="courseSearchTable">
+  </table>
+</div>
+{% endblock %}
+{% block js_bottom %}
+{{ super() }}
+<script type="text/javascript">
+
+
+  $(document).ready(function() {
+      $("#courseName").keyup(function(){
+        searchCourseName();
+      });
+  });
+
+  function searchCourseName(){
+    $.ajax({
+          url         :'{{ url_for("search_course_name")}}',
+          type        :"POST",
+          contentType: 'application/json',
+          data: JSON.stringify({
+          'courseName': $("#courseName").val(),
+          }),
+          success     :function(result) {
+              var courseList = $.parseJSON(result);
+              var strCourseList="";
+              for(var i=0; i < courseList.length;i++){
+                  strCourseList+='<li onclick="courseSecurityCode('+ courseList[i].id +')"><a href="#">';
+                  strCourseList+=courseList[i].name;
+                  strCourseList+="</a></li>";
+              }
+              if(courseList.length == 0){
+                strCourseList+="<li style='display: none;' class='student'><a>No Courses</a></li>";
+              }
+              $('#courseSearchTable').html(strCourseList);
+              var registerforClass = "<li style='display: none;' class='student'><a href='/course/registerForCourse'>Register For Course</a></li>"
+              $('#courseSearchTable').append(registerforClass);
+                
+          }
+      });
+  }
+  function courseSecurityCode(courseId){
+    var code = parseInt(prompt("Please enter this course's Registration Code", "123456"));
+    $.ajax({
+      url         :'{{ url_for("security_code")}}',
+      type        :"POST",
+      contentType: 'application/json',
+      data: JSON.stringify({
+      'securityCode': code,
+      'courseId': courseId,
+      }),
+      success     :function(result) {
+          if (result.indexOf("Redirect") == 0){
+            window.location.href = result.split(":")[1]
+          }
+          else {
+            $('#courseSearchTable').html(result);
+          }
+      }
+    });
+  }
+
+</script>
+{% endblock %}

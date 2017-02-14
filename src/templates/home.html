@@ -6,5 +6,182 @@
 </head>
 {% endblock %}
 {% block body %}
-{{ text }}
+<div class="row">
+    <div class="col-md-10 col-sm-10 col-sm-offset-1 col-md-offset-1">
+        {% if courses_enrolled %}
+        <div id="classes-teaching-list" class="list-group">
+            <li class="list-group-item active" align="center"><strong>Courses Enrolled</strong></li>
+            {% for course in courses_enrolled %}
+                <a href="/course/view/{{1000 + course.id}}" class="list-group-item">{{course.name}}</a>
+            {% endfor %}
+        </div>
+        {% elif current_user.permissions == 10%}
+        <div class="jumbotron">
+            <h1>Welcome!</h1>
+            <p>It looks as though you are not enrolled in any classes yet. 
+                If you have a class code, go to the courses drop down and register now. 
+                Otherwise contact an instructor to get approval.
+            </p>
+        </div>
+        {% endif %}
+
+        {% if courses_teaching and current_user.permissions >=20%}
+        <div id="classes-teaching-list" class="list-group">
+            <li class="list-group-item active" align="center"><strong>Courses Teaching</strong></li>
+            {% for course in courses_teaching %}
+                <a href="/course/view/{{1000 + course.id}}" class="list-group-item">{{course.name}}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-10 col-sm-10 col-sm-offset-1">
+        {% if courses_enrolled %}
+        <div id="task-list-current" class="list-group">
+        </div>
+        <div id="task-list-complete" class="list-group">
+        </div>
+        {% endif %}
+        {% if courses_teaching and current_user.permissions >=20%}
+        <div id="tasks-teaching-list" class="list-group">
+            <li class="list-group-item active" align="center"><strong>Tasks (teaching)</strong></li>
+            <a href="" class="list-group-item">
+                <table width="100%">
+                    <tr>
+                        <td width="30%"><b>Title</b></td>
+                        <td width="30%"><b>Duedate</b></td>
+                        <td width="20%"><b>Status</b></td>
+                        <td width="20%"><b>Copy / Edit / Delete</b></td>
+                    </tr>
+                </table>
+            </a>
+
+            {% for course in courses_teaching %}
+                {% for task in course.tasks %}
+                    <a href="{{url_for('task_view', taskID=task.id)}}" class="list-group-item">
+                        <table width="100%">
+                            <tr>
+                                <td width="30%">{{task.title }} <br> <font size="1">{{ course.name}}</font></td>
+                                <td width="30%">{{ task.duedate }}</td>
+                                <td width="20%">{{ task.status.capitalize()}}</td>
+                                <td width="20%">
+                                    <!-- Copy task -->
+                                    <form action="{{url_for('taskBuilder_copy', taskID=task.id)}}" style="display:inline">
+                                        <button title="Create a copy of this task." class="btn btn-primary">
+                                            <span class="glyphicon glyphicon-duplicate"></span>
+                                        </button>
+                                    </form>
+                                    <!-- Edit task -->
+                                    <form action="{{url_for('taskBuilder_edit', taskID=task.id)}}" style="display:inline">
+                                        <button title="Edit this task." class="btn btn-success">
+                                            <span class="glyphicon glyphicon-pencil"></span>
+                                        </button>
+                                    </form>           
+                                    <!-- Delete task -->
+                                    <form action="" style="display:inline" class="wp-no-reload">
+                                        <button title="Delete task {{ task.title }}" class="btn btn-danger" onclick="deleteTask(this,{{task.id }},'{{task.title}}')">
+                                            <span class="glyphicon glyphicon-trash"></span>
+                                        </button> 
+                                    </form>
+                                </td>               
+                            </tr>
+                        </table>
+                    </a>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block js_bottom %}
+{{ super() }}
+<script>    
+    function deleteTask( button, task_id, task_title ) {
+        // confim if they want to delete the task
+        var confirmed = confirm("Are you sure you want to delete task " + task_title + "?")
+        if(confirmed != true){
+            // they pressed cancel
+            return;
+        }
+
+        var row = $(button).closest("a.list-group-item")
+        row.fadeOut(400, function(){
+            row.remove();
+        });
+
+        var data = {};
+        data['task_id'] = task_id;
+        $.ajax({
+          url: "{{ url_for('deleteTask') }}",
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(data),
+          error: function(data){
+              console.log(data);
+          }
+        });
+    }
+    function getTaskList() {
+        $.ajax({
+            url         :'{{ url_for("task_list")}}',
+            type        :"GET",
+            success     :function(result) {
+                var taskList = $.parseJSON(result);
+                var strCurrentTaskList="";
+                strCurrentTaskList+="<li class='list-group-item active' align='center'><strong>Current Tasks (student)</strong></li>";
+                for(var i=0; i < taskList.current.length;i++){
+                    strCurrentTaskList+="<a href='{{url_for('task_view', taskID='')}}" + taskList.current[i].id + "' class='list-group-item";
+                    var curTime = new Date(new Date().getTime() + new Date().getTimezoneOffset()*1000); // remove timezone
+                    var msTillDue = (new Date(taskList.current[i].duedate).getTime() - curTime) / 86400;
+                    if(msTillDue < 0)
+                        strCurrentTaskList+=" list-group-item-danger'>"; // item overdue
+                    else if(msTillDue < 1000)
+                        strCurrentTaskList+=" list-group-item-warning'>"; // due in <1 day
+                    else
+                        strCurrentTaskList+="'>"; // due in >= 1 day
+                    strCurrentTaskList+=taskList.current[i].title + "<br> ";
+                    strCurrentTaskList+= "<font size='1'>" + taskList.current[i].courseName + "</font>";
+                    if(taskList.current[i].title == "")
+                        strCurrentTaskList+="no title";
+                    strCurrentTaskList+='<div class="pull-right">due on ';
+                    strCurrentTaskList+=taskList.current[i].duedate.substring(0,11);
+                    strCurrentTaskList+=' at ' + taskList.current[i].duedate.substring(17,22);
+                    strCurrentTaskList+='</div>';
+                    strCurrentTaskList+="</a>";
+                }
+                if(taskList.current.length == 0){
+                    strCurrentTaskList+="<li class='list-group-item'>No Tasks</li>";
+                }
+
+                var strCompleteTaskList="";
+                strCompleteTaskList+="<li class='list-group-item active' align='center'><strong>Complete Tasks (student)</strong></li>";
+                for(var i=0; i < taskList.complete.length;i++){
+                    strCompleteTaskList+="<a href='{{url_for('task_view', taskID='')}}" 
+                    + taskList.complete[i].id + "' class='list-group-item'>";
+                    strCompleteTaskList+=taskList.complete[i].title + "<br> ";
+                    strCompleteTaskList+= "<font size='1'>" + taskList.complete[i].courseName + "</font>";
+                    strCompleteTaskList+='<div class="pull-right">due on ';
+                    strCompleteTaskList+=taskList.complete[i].duedate.substring(0,11);
+                    strCompleteTaskList+=' at ' + taskList.complete[i].duedate.substring(17,22);
+                    strCompleteTaskList+='</div>';
+                    strCompleteTaskList+="</a>";
+                }
+                if(taskList.complete.length == 0){
+                    strCompleteTaskList+="<li class='list-group-item'>No Tasks</li>";
+                }
+
+                $('#task-list-current').html(strCurrentTaskList);
+                $('#task-list-complete').html(strCompleteTaskList);
+            }
+        });
+    }
+    $(document).ready(function() {
+        getTaskList();
+        // prevent some form submissions from reloading the page
+        $('.wp-no-reload').submit(function(event) {
+            // dont' reload the page on form submit
+            event.preventDefault();
+        });
+    })
+</script>
 {% endblock %}

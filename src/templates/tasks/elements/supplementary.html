@@ -1,0 +1,215 @@
+{% extends "tasks/elements/layout-question.html" %}
+{% block answer_details %}
+  <div class="panel-body">
+    <div class="dropdown EDIT_ONLY">
+      <button class="btn btn-default dropdown-toggle" type="button" id="buttonsPerRow" data-toggle="dropdown" aria-expanded="true">
+        Elements Per Row
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="buttonsPerRow">
+        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="setBtnWidth(this,1)">1</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="setBtnWidth(this,2)">2</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="setBtnWidth(this,3)">3</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="setBtnWidth(this,4)">4</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="setBtnWidth(this,6)">6</a></li>
+      </ul>
+      <br>
+    </div>
+    <div class="supplementary-target">
+    </div>  
+    <div class="dropdown EDIT_ONLY">
+      <br>
+      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+        Add Material
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="addVideo(this)">Youtube Video</a></li>
+        <!-- TODO <li role="presentation"><a role="menuitem" tabindex="-1" onclick="addAudio(this)">Audio</a></li> -->
+        <!-- TODO <li role="presentation"><a role="menuitem" tabindex="-1" onclick="addText(this)">Text</a></li> -->
+        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="addImage(this)">Image</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="addOtherFile(this)">Document</a></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" onclick="addTextLabel(this)">Text Label</a></li>
+      </ul>
+    </div>
+  </div>
+  <div>
+  <div id="wp-video-template" style="display:none">
+    <div class="wp-video wp-supplementary">
+      <div class="panel-body wp-video-panel col-md-3" align="center" onclick="clickVideo(this)" style="height:232px;border:3px;border-style:outset;border-radius:25px;cursor:pointer;overflow:auto">
+        <img src="../static/images/video-button.png" style="width:140px;height:140px">
+        <h3 id="p_title" class="TAKE_ONLY wp-pair-text-2" align="center"/>
+      </div>
+      <input type="text" id="title" class="EDIT_ONLY form-control wp-pair-input-2" placeholder="Element Title" onchange="textChange1Parent(this)">
+      <input type="text" class="form-control EDIT_ONLY wp-video-src" onchange="updateVideoSRC(this)" placeholder="Post a Youtube Video URL here">
+      <input id="nextMinTimeID" type="text" class="form-control EDIT_ONLY wp-supp-input" placeholder="Min Time (seconds)">
+      <!-- Video modal -->
+      <div class="modal fade" id="nextID" data-supplmentary-duration="">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-body">
+            <div class="embed-responsive embed-responsive-16by9">
+              <iframe class="embed-responsive-item" width="420" height="315" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wp-audio-template" style="display:none">
+    <div class="wp-video wp-supplementary">
+      <!-- TODO implement a clickAudio function -->
+      <div class="panel-body wp-video-panel col-md-3" align="center" style="height:232px;border:3px;border-style:outset;border-radius:25px;cursor:pointer;overflow:auto">
+        <img src="../static/images/audio-button.jpg" style="width:140px;height:140px">
+        <h3 id="p_title" class="TAKE_ONLY wp-pair-text-2" align="center"/>
+      </div>
+      <input type="text" id="title" class="EDIT_ONLY form-control wp-pair-text-2" placeholder="Element Title" onchange="textChange1Parent(this)">
+      <div class="EDIT_ONLY">
+        <div class="row"/>
+        <input id="nextMinTimeID" type="text" class="form-control EDIT_ONLY wp-supp-input" placeholder="Min Time (seconds)">
+        <span class="btn btn-default btn-file">
+          Audio File
+          <input type="file" name="Audio file" class="wp-audio-src">
+        </span>
+        <br><br>
+      </div>
+      <!-- Audio modal -->
+      <div class="modal fade" id="nextID" data-supplmentary-duration="">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-body">
+              <div align="center">
+                <audio controls>
+                </audio>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wp-text-template" style="display:none">
+    <div class="wp-video wp-supplementary">
+      <!-- TODO implement a clickText function -->
+      <div class="panel-body wp-video-panel col-md-3" align="center" style="height:232px;border:3px;border-style:outset;border-radius:25px;cursor:pointer;overflow:auto">
+        <img src="../static/images/text-button.png" style="width:140px;height:140px">
+        <h3 id="p_title" class="TAKE_ONLY wp-pair-text-2" align="center"/>
+      </div>
+      <input type="text" id="title" class="EDIT_ONLY form-control wp-pair-input-2" placeholder="Element Title" onchange="textChange1Parent(this)">
+      <input id="nextMinTimeID" type="text" class="form-control EDIT_ONLY wp-supp-input" placeholder="Min Time (seconds)">
+      <div class="EDIT_ONLY">
+        <div class="row"/>
+        <span class="btn btn-default btn-file">
+          Upload File<input type="file" name="Text file" class="wp-text-src">
+        </span>
+      </div>
+      <!-- Text modal -->
+      <div class="modal fade" id="nextID" data-supplmentary-duration="">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-body">
+            <div class="embed-responsive embed-responsive-16by9">
+              <iframe class="embed-responsive-item" width="420" height="315" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="wp-image-template" style="display:none">
+    <div class="wp-image wp-supplementary">
+      <div class="panel-body wp-video-panel col-md-3" align="center" onclick="clickImage(this)" style="height:232px;border:3px;border-style:outset;border-radius:25px;cursor:pointer;overflow:auto">
+        <img src="../static/images/image-button.png" style="width:140px;height:140px">
+        <h3 id="p_title" class="TAKE_ONLY wp-pair-text-2" align="center"/>
+      </div>
+      <input type="text" id="title" class="EDIT_ONLY form-control wp-pair-input-2" placeholder="Element Title" onchange="textChange1Parent(this)">
+      <input id="nextMinTimeID" type="text" class="form-control EDIT_ONLY wp-supp-input" placeholder="Min Time (seconds)">
+      <div class="EDIT_ONLY">
+        <div class="row"/>
+        <form role="form", action="/upload" method="POST" enctype="multipart/form-data">
+          <span class="btn btn-default btn-file">
+            Upload File<input type="file" name="file_path" class="wp-img-src" onchange="uploadImageFile(this.parentNode.parentNode)">
+          </span>
+          <div class="wp-file-text" style="display:inline"></div>
+        </form>
+      </div>
+      <!-- Image modal -->
+      <div class="modal fade" id="nextID" data-supplmentary-duration="">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-body">
+            <div class="embed-responsive embed-responsive-16by9">
+              <img style="max-width:525px;max-height:300px" src="" frameborder="0"></img>
+            </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>    
+    </div>
+  </div>
+
+  <div id="wp-file-template" style="display:none">
+    <div class="wp-file wp-supplementary">
+      <div class="panel-body wp-file-panel col-md-3" align="center" onclick="clickFile(this)" style="height:232px;border:3px;border-style:outset;border-radius:25px;cursor:pointer;overflow:auto">
+        <h3 class="wp-file-title-label wp-pair-text-2"></h3>
+      </div>
+      <div class="EDIT_ONLY">
+        <div class="row"/>
+        <form role="form", action="/upload" method="POST" enctype="multipart/form-data">
+          <input type="text" id="title" class="EDIT_ONLY form-control wp-file-title wp-pair-input-2" name="material_title" placeholder="Element Title" onchange="changeTitle(this)">
+          <input id="nextMinTimeID" type="text" class="form-control EDIT_ONLY wp-supp-input" placeholder="Min Time (seconds)">
+          <br><br>
+          <span class="btn btn-default btn-file">
+            Upload File<input type="file" name="file_path" class="wp-file-src" onchange="uploadFile(this.parentNode.parentNode)">
+          </span>
+          <div class="wp-file-text" style="display:inline"></div>
+        </form>
+      </div>
+      <!-- Other file modal -->
+      <div class="modal fade" id="nextID" data-supplmentary-duration="">
+        <div class="modal-dialog modal-xl">
+          <div class="modal-content">
+            <div class="modal-body">
+            <div class="embed-responsive embed-responsive-16by9">
+              <iframe class="embed-responsive-item" width="420" height="315" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>    
+    </div>
+  </div>
+
+  <div id="wp-text-label-template" style="display:none">
+    <div class="wp-file wp-supplementary">
+      <div class="panel-body col-md-3" align="center" style="height:232px;border:1px;border-style:outset;border-radius:5px;background-color:#CCCCCC;overflow:auto">
+        <h3 class="wp-file-title-label wp-pair-text-2"></h3>
+      </div>
+      <div class="EDIT_ONLY">
+        <div class="row"/>
+        <input type="text" id="title" class="EDIT_ONLY form-control wp-pair-input-2" name="material_title" placeholder="Element Title" onchange="changeTitle(this)">
+        <br><br>
+      </div>
+    </div>
+  </div>
+{% endblock %}

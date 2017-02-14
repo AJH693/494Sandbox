@@ -1,0 +1,38 @@
+{% extends "tasks/elements/layout-question.html" %}
+{% block answer_details %}
+  <div class="panel-body multipleChoice question automatic-grading" id="notSet">
+    <div>
+      <textarea id="body" class="form-control EDIT_ONLY" placeholder="Question Content" onchange="textChange(this)"></textarea>
+      <p id="p_body" class="TAKE_ONLY question-content"></p>
+      <hr>
+    </div>
+    <div class="input-group hidden radioResponse">
+      <span class="input-group-addon"> <input class="unassignedName radio-template" type="radio" name="0" onchange="hideAnswerKeyAlertIfAppropriate()"> </span>
+      <input type="text" class="form-control EDIT_ONLY" onchange="textChangeBySibling(this)">
+      <p class="form-control TAKE_ONLY multichoice-content"></p>
+      <span class="EDIT_ONLY input-group-addon">
+        <span class="glyphicon glyphicon-trash"></span>
+      </span>
+    </div>
+  </div>
+  <p id="addNewResponse" class="EDIT_ONLY text-center new-response"><a>Add another response</a></p>
+{% endblock %}
+{% block js_bottom %}
+<script type="text/javascript">
+  $(document).ready(function(){
+    var mcID = getNextID("question");
+    $("#notSet").attr("id", mcID);
+    $(".unassignedName").attr("name", mcID);
+    $(".unassignedName").removeClass("unassignedName");
+    addRadioResponse('#' + mcID);
+    addRadioResponse('#' + mcID);
+    $(".glyphicon-trash").click(function(){
+      $(this).closest("div").parent().remove();
+    });
+    $("#addNewResponse").click(function(){
+      addRadioResponse('#' + mcID);
+    })
+    $('#addNewResponse').attr('id', '');
+  });
+  </script>
+  {% endblock %}

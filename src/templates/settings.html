@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% block header_css %}
+<head>
+    <title>Course</title>
+    {{ super() }}
+</head>
+{% endblock %}
+{% block body %}
+<div class="col-md-8 col-sm-12 col-sm-offset-2 author admin" style="display: none">
+    <div id="tasks-teaching-list" class="list-group">
+        <li class="list-group-item active" align="center"><strong>Options</strong></li>
+        <a class="list-group-item">
+            <table width="100%">
+                <tr class="admin" style="display: none">
+                    <td width="35%"><b>Change Status to Author</b></td>
+                    <td width="15%"><input id="authorEmail" type="text" class="form-control" placeholder="User's Email" /></td>
+                    <td width="15%">&nbsp</td>
+                    <td width="15%"><button id="submitAddAuthor" type="button" class="btn btn-lg btn-warning pull-right">Change</button> </td>
+                    <td id="addAuthorNotification" width="20%" style="color:red; visibility: hidden">  *Incorrect</td>
+                </tr>
+                <tr class="admin" style="display: none"><td>&nbsp</td></tr>
+                <tr class="admin" style="display: none">
+                    <td width="35%"><b>Change Status to Admin</b></td>
+                    <td width="15%"><input id="adminEmail" type="text" class="form-control" placeholder="User's Email" /></td>
+                    <td width="15%">&nbsp</td>
+                    <td width="15%"><button id="submitAddAdmin" type="button" class="btn btn-lg btn-warning pull-right">Change</button> </td>
+                    <td id="addAdminNotification" width="20%" style="color:red; visibility: hidden">  *Incorrect</td>
+                </tr>
+                <tr class="admin" style="display: none"><td>&nbsp</td></tr>
+                <tr class="admin" style="display: none">
+                    <td width="35%"><b>Remove Author</b></td>
+                    <td width="15%"><input id="removalAuthorEmail" type="text" class="form-control" placeholder="User's Email" /></td>
+                    <td width="15%">&nbsp</td>
+                    <td width="15%"><button id="submitRemoveAuthor" type="button" class="btn btn-lg btn-danger pull-right">Remove</button> </td>
+                    <td id="removeAuthorNotification" width="20%" style="color:red; visibility: hidden">  *Incorrect</td>
+                </tr>
+                <tr class="admin" style="display: none"><td>&nbsp</td></tr>
+                <tr class="admin" style="display: none">
+                    <td width="35%"><b>Remove Admin</b></td>
+                    <td width="15%"><input id="removalAdminEmail" type="text" class="form-control" placeholder="User's Email" /></td>
+                    <td width="15%">&nbsp</td>
+                    <td width="15%"><button id="submitRemoveAdmin" type="button" class="btn btn-lg btn-danger pull-right">Remove</button> </td>
+                    <td id="removeAdminNotification" width="20%" style="color:red; visibility: hidden">  *Incorrect</td>
+                </tr>
+            </table>
+        </a>
+    </div>
+</div>
+
+{% endblock %}
+{% block js_bottom %}
+{{ super() }}
+<script>    
+    function addAuthor() {
+        $.ajax({
+              url: '{{ url_for("add_Author") }}',
+              type: 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify({
+                    'email': $("#authorEmail").val(),
+                }),
+                success:  function(data) {
+                    alert(data + " is now an Author");
+                    $("#addAuthorNotification").css("visibility", "hidden");
+                    $("#authorEmail").val("");
+                },
+                error: function(data){    
+                    $("#addAuthorNotification").css("visibility","visible");
+                }
+        });
+    }
+
+    function addAdmin() {
+        var code = prompt("Please enter Security Code to add admin", "123456");
+        $.ajax({
+              url: '{{ url_for("add_Admin") }}',
+              type: 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify({
+                    'email': $("#adminEmail").val(),
+                    'securityCode': code,
+
+                }),
+                success:  function(data) {
+                    alert(data + " is now an Admin");
+                    $("#addAdminNotification").css("visibility", "hidden");
+                    $("#adminEmail").val("");
+                },
+                error: function(data){
+                    $("#addAdminNotification").css("visibility","visible");
+                }
+        });
+    }
+    function removeUser(user,removeAdmin) {
+        var code ="";
+        if(removeAdmin){
+            code = prompt("Please enter Security Code to remove admin", "123456");
+        }
+        $.ajax({
+              url: '{{ url_for("remove_User") }}',
+              type: 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify({
+                    'email': user,
+                    'securityCode': code,
+
+                }),
+                success:  function(data) {
+                    alert(data + " is now a Student");
+                    $("#addAUserNotification").css("visibility", "hidden");
+                    $("#removalAdminEmail").val("");
+                    $("#removalAuthorEmail").val("");
+                },
+                error: function(data){
+                    if(removeAdmin){
+                        $("#removeAdminNotification").css("visibility","visible");
+                    }else{
+                        $("#removeAuthorNotification").css("visibility","visible");
+                    }   
+                }
+        });
+    }
+    $(document).ready(function() {
+        $("#submitAddAuthor").click(function(){
+            addAuthor();
+        });
+        $("#submitAddAdmin").click(function(){
+            addAdmin();
+        });
+        $("#submitRemoveAuthor").click(function(){
+            removeUser($("#removalAuthorEmail").val(),false);
+        });
+        $("#submitRemoveAdmin").click(function(){
+            removeUser($("#removalAdminEmail").val(),true);
+        });
+    })
+</script>
+{% endblock %}

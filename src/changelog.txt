@@ -1,0 +1,37 @@
+### April 23
+alter table task add column xml_data text;
+alter table task_response add column xml_data text;
+
+###April  21st
+alter table task_response add supplementary_order Text default "[]";
+
+
+### April 12th
+alter table course add column secondaryTeachers varchar(255);
+
+
+### April 4th
+create table temp_table as select * from course;
+drop table course;
+create table course (id INTEGER NOT NULL, name VARCHAR(255), title VARCHAR(255), securityCode INTEGER, teacher_id INTEGER, PRIMARY KEY (id), FOREIGN KEY(teacher_id) REFERENCES user (id));
+insert into course select * from temp_table;
+drop table temp_table;
+alter table course add column isArchived BOOLEAN;
+update course set isArchived=0;
+
+
+### March 12th
+alter table task add column status varchar(20);
+alter table task_response add column graded tinyint(1);
+
+
+### March 8th
+- database:
+alter table task_response add column start_time datetime;
+alter table task_response add column end_time datetime;
+alter table task_response add column cognitive_grade float;
+
+
+### March 7th 
+- settingslocal.py:
+SANDBOX_HOST = 'localhost'

@@ -1,0 +1,200 @@
+{% extends "layout.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block header_css %}
+<head>
+  <title>Register  </title>
+  {{super()}}
+  <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='bootstrap3/css/login.css') }}">
+</head>
+{% endblock %}
+
+{% block body %}
+<div id="registerInput" class="login">
+  <h1>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please Register</h1>
+  <br>
+  <p>
+    <label for="displayName">Full Name</label>
+    <input id="displayName" type="text" name="displayName" placeholder="Full Name" required>
+  </p>
+  <p>
+    <label for="email">Email</label>
+    <input id="email" type="email" name="email" placeholder="Email address" required>
+  </p>
+  <p>
+    <label for="emailConfirm"></label>
+    <input id="emailConfirm" type="email" name="emailConfirm" placeholder="Confirm Email address" required>
+  </p>
+  <p>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" placeholder="Password" required>
+  </p>
+  <p>
+    <label for="passwordConfirm"></label>
+    <input id="passwordConfirm" name="passwordConfirm" type="password" placeholder="Confirm Password" >
+  </p>
+  <br>
+  <p>Passwords must contain 1 number, 1 capital letter, <br>1 lower case letter, and minimum of 6 characters </p>
+  <br>
+  <div id="errorField">
+  </div>
+  <div class="row">
+      <input type="hidden" id="errorText" value="errorText"> 
+  </div>
+  <button id="register" class="btn btn-lg btn-success col-md-12">Register</button>
+</div>
+{% endblock %}
+
+{% block js_bottom %}
+{{ super() }}
+<script type="text/javascript">
+  $("#page-nav").hide();
+
+  $("#registerInput").keypress(function(event) {
+      if (event.which == 13) {
+          event.preventDefault();
+          validate();
+      }
+  });
+
+  $("#register").click(function(){
+    validate();
+    $("#errorField").hide();
+
+  });
+
+  function validate(){
+
+    var results = new Array(5);
+    var elements = new Array(4);
+    results[0] = validateEmail($("#email"));
+    elements[0] = $("#email");
+    results[1] = validateEmail($("#emailConfirm"));
+    elements[1] = $("#emailConfirm");
+    results[2] = validatePassword($("#password"));
+    elements[2] = $("#password");
+    results[3] = validatePassword($("#passwordConfirm"));
+    elements[3] = $("#passwordConfirm");
+    results[4] = validateDisplayName($("#displayName"));
+    elements[4] = $("#displayName");
+    if(($("#email").val() == $("#emailConfirm").val()) && ($("#email").val() != "") && ($("#emailConfirm").val())){
+      results[5] = true;
+    }else{
+      results[5] = false;
+    }
+    if(($("#password").val() == $("#passwordConfirm").val()) && ($("#password").val() != "") && ($("#passwordConfirm").val())){
+      results[6] = true;
+    }else{
+      results[6] = false;
+    }
+    var errorCount = 0;
+    for(var i = 0; i < results.length; i++){
+      if(results[i] == false){
+        errorCount++;
+          if(i < elements.length){
+            setErrorClass(elements[i]);
+          }
+          //if emails don't match, set the inputs as errored
+          if(i == 5){
+            setErrorClass(elements[0]);
+            setErrorClass(elements[1]);
+          }
+          //if passwords on't mathc, set the inputs as errored
+          if(i == 6){
+            setErrorClass(elements[2]);
+            setErrorClass(elements[3]);
+          }
+      }
+      else{
+          //if the emails match remove error code
+          //if the passwords mathc remove error code
+          if(i == 5 && results[0] != false && results[1] !=false){
+
+            removeErrorClass(elements[0]);
+            removeErrorClass(elements[1]);
+          }else if(i == 6 && results[2] != false && results[3] !=false){
+
+            removeErrorClass(elements[2]);
+            removeErrorClass(elements[3]);
+
+          }else{
+            removeErrorClass(elements[i]);
+
+          }
+      }
+    }
+    if(errorCount == 0){
+      //call to python, validate again, and push to database
+      submit();
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+var removeErrorClass = function(element){
+        element.css('border-color', '');
+        element.css('border-style', '');
+        element.css('border-width', '');
+    }
+
+var setErrorClass = function(element){
+        element.css('border-color', '#b84a49');
+        element.css('border-style', 'solid');
+        element.css('border-width', '2px');
+    }
+  //Submit gets repoonse from python backend, failure means email already exists
+  function submit(){
+    $.ajax({
+      url: '{{ url_for("register") }}',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        'displayName': $("#displayName").val(),
+        'email': $("#email").val(),
+        'emailConfirm': $("#emailConfirm").val(),
+        'password': $("#password").val(),
+        'passwordConfirm': $("#passwordConfirm").val(),
+        'author': false
+      }),
+      success:  function(data) {
+        window.location.href=$.parseJSON(data)["next_url"];
+      },
+      error: function(data){
+        setErrorClass($("#email"));
+        $("#errorField").html("<p style='color:red'>" + data.responseText + "</p>");
+        $("#errorField").show();
+      }
+    });
+  }
+  
+  function validateEmail(emailVal){
+    var email = emailVal.val();
+    var regex = /[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}/igm;
+    if (email == '' || !regex.test(email))
+    {
+        return false;
+    }
+  }
+  function validateDisplayName(displayNameVal){
+    var displayName = displayNameVal.val();
+    var regex = /^[a-zA-Z ]+$/;
+    if (displayName == '' || !regex.test(displayName))
+    {
+        return false;
+    }
+  }
+
+  function validatePassword(passwordVal){
+    var password = passwordVal.val();
+    // at least one number, one lowercase and one uppercase letter
+    // at least six characters
+    var regex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
+    if(password == '' || !regex.test(password))
+    {
+      return false;
+    }
+  }
+</script>
+{% endblock %}

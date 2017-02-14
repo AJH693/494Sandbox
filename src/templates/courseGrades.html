@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block header_css %}
+<head>
+    <title>Instructor Gradebook</title>
+    {{ super() }}
+</head>
+{% endblock %}
+{% block body %}
+        <table id= "grades" class = "table table-bordered" overflow = "auto">
+            <thead>
+                <tr class="info" style="color:white">
+                    <th width="10%">Student Name</th>
+                    {% for t in course_tasks['course_tasks'] %}
+                        <th class="rotate-5" align="center"><div><span>{{t.title}}</span></div></th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            {% for u in data %}
+            <tr>
+                <th>{% if u['user'].name %}{{u['user'].name}}{% else %}{{u['user'].email}}{% endif %}</th>
+                {% for t in u['tasks'] %}
+                    {% if t['response'].id and t['response'].graded %}
+                        <td><a href="{{url_for('response', responseID=t['response'].id)}}">{{t['response'].correctness_grade}}</a></td>
+                    {% elif t['response'].id %}
+                        <td><a href="{{url_for('response', responseID=t['response'].id)}}"><span class="glyphicon glyphicon-time" aria-hidden="true" style="color:#f0ad4e;"></span></a></td>
+                    {% else %}
+                        <td><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+{% endblock %}

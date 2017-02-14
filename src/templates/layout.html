@@ -3,10 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/ico" href="/static/img/RM_Box_Logo.ico">
+    <link rel="icon" type="image/ico" href="/static/images/brain.ico">
 </head>
 <body style="padding: 65px 25px">{% block header_css %}
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='bootstrap3/css/bootstrap.css') }}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static', filename='bootstrap3/css/custom-styling.css') }}">
     <style type="text/css"> body { padding-top: 60px; padding-bottom: 40px; } </style>
 {% endblock header_css %}
     <!-- Start NavBar -->
@@ -19,21 +20,34 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="{{ url_for('home') }}">494Sandbox</a>
+                <a class="navbar-brand2" href="{{ url_for('home') }}"><img src='../../static/images/LearnTrace0.png' width="30%" height="100%"/></a>
             </div>
                 <!-- Creates the dropdown menu when window gets small -->
             <div class="collapse navbar-collapse">
+                <ul id="page-nav" class="nav navbar-nav">
+                    <li><a href="/home">Home</a></li>
+                    <li style="display: none" class="author admin ta"><a href="/taskBuilder">Task Builder</a></li>
+                    <li class="dropdown">
+                        <a id="courses-dropdown" data-target="#" href="" data-toggle="dropdown">Courses 
+                            <span class="caret"></span>
+                        </a>
+                        <ul id="courses-dropdown-list" class="dropdown-menu" role="menu">
+                        </ul>
+                    </li>
+                    <li><a href="/gradebook">Gradebook</a></li>
+                </ul>
                 <ul class="nav navbar-right navbar-nav">
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            {% if session.displayname %}
-                                {{ session.displayname }}
-                            {% else %}
-                                {{ session.user_id }}
+                            {% if session.name %}
+                                {{ session.name }} 
+                                 <b class="caret"></b>
                             {% endif %}
-                            <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
+                            <li style="display: none" class="student ta"><a href="{{ url_for('settings') }}">Student Settings</a></li>
+                            <li style="display: none" class="author"><a href="{{ url_for('settings') }}">Author Settings</a></li>
+                            <li style="display: none" class="admin"><a href="{{ url_for('settings') }}">Admin Settings</a></li>
                             <li><a href="{{ url_for('logout') }}">Log Out</a></li>
                         </ul>
                     </li>
@@ -48,22 +62,74 @@
         {% block body %}{% endblock %}
     </div>
     <!-- End the main page content -->
-
+    <!-- Footer -->
+<!--     <div class="row">
+        <div class="footer text-center">
+            <p align="center" style="padding-right: 7px">Iowa State Senior Design &middot; <a> <img src='../../static/images/brain.png' width="2%" height="2%"/> </a></p>
+        </div>
+    </div>
+    <nav class=" navbar-fixed-bottom" style="background:#FFF">
+        <div class="container-fluid">
+        <p align="center">Iowa State Senior Design &middot; <a> <img src='../../static/images/brain.png' width="2%" height="2%"/> </a><p>
+        </div>
+    </nav> -->
     {% block js_bottom %}{# Placed at the end of the document so the pages load faster #}
     <script src="/static/jquery-2.1.1.min.js"></script>
     <script src="/static/bootstrap3/js/bootstrap.min.js"></script>
     <script type="text/javascript">
+
+        function buildCoursesList() {
+            $.ajax({
+                url         :'{{ url_for("class_list")}}',
+                type        :"GET",
+                async       :false,
+                success     :function(result) {
+                    var classList = $.parseJSON(result);
+                    var strClassList="<li style='display: none;' class='author admin'><a href='/course/create'>Create Course</a></li>";
+                    var registerforClass = "<li style='display: none;' class='student author admin ta'><a href='/course/registerForCourse'>Register For Course</a></li>"
+                    strClassList += registerforClass;
+                    for(var i=0; i < classList.length;i++){
+
+                        url = "{{url_for('view_course', courseID='')}}";
+                        url += classList[i].id + 1000;
+                        strClassList+="<li><a href='" + url + "'>";
+                        strClassList+=classList[i].name;
+                        strClassList+="</a></li>";
+                    }
+                    if(classList.length == 0){
+                      strClassList+="<li style='display: none;' class='student ta'><a>No Courses</a></li>";
+                    }
+                    $('#courses-dropdown-list').html(strClassList);
+                }
+            });
+        }
         $(document).ready(function(){
-
-
             var url_path = window.location.pathname.replace('/').split('/');
             $('#page-nav li a').each(function() {
                 if (url_path[0] == $(this).attr('href').replace('/').split('/')[0]) {
                     $(this).parent('li').addClass('active');
                 }
             });
-
-
+            buildCoursesList();
+            var access = "{{session['permissions']}}";
+            if(access == 10){
+                $(".student").each(function(){
+                    $(this).show();
+                });
+            }else if(access == 20){
+                $(".ta").each(function(){
+                    $(this).show();
+                })
+            }else if(access == 50){
+                $(".author").each(function(){
+                    $(this).show();
+                });
+            }else if (access == 100){
+                $(".admin").each(function(){
+                    $(this).show();
+                });
+            }else{
+            }
         });
     </script>
     {% endblock js_bottom %}

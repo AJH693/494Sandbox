@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block header_css %}
+<head>
+    <title>Personal Gradebook - Student</title>
+    {{ super() }}
+</head>
+{% endblock %}
+{% block body %}
+<div class= "row">
+    <div class="col-md-8 col-md-offset-2">
+        {% for d in tasks %}
+            <div id="class-{{ d['course'].id }}" class="list-group">
+                <li class="list-group-item active" align="center"><strong>{{d['course'].name}}</strong></li>
+                <a href="" class="list-group-item">
+                    <table width="100%">
+                            <tr>
+                                <th width="50%">Title</th>
+                                <th width="25%">Due Date</th>
+                                <th width="25%">Grade</th>
+                            </tr>
+                    </table>
+                </a>
+                {% for task in d['tasks'] %}
+                    {% if task['response'].id and task['task'].status == "grades published"%}
+                        <a href="{{url_for('response', responseID=task['response'].id)}}" class="list-group-item">
+                    {% elif not task['response'].id %}
+                        <a href="{{url_for('task_view', taskID=task['task'].id)}}" class="list-group-item">
+                    {% else %}
+                        <a class="list-group-item">
+                    {% endif %}
+                        <table width="100%">
+                            <tr>
+                                <td width="50%">{{ task['task'].title }}</td>
+                                <td width="25%">{{ task['task'].duedate }}</td>
+                                {% if task['task'].status == "grades published"%}
+                                <td width="25%">{{ task['response'].correctness_grade}}</td>
+                                {% elif task['response'].id %}
+                                <td width="25%"><span class="glyphicon glyphicon-time" aria-hidden="true" style="color:#f0ad4e;"></span></td>
+                                {% else %}
+                                <td width="25%"><span class="glyphicon glyphicon-minus" aria-hidden="true"></span></td>
+                                {% endif %}
+                            </tr>
+                        </table>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block js_bottom %}
+{{ super() }}
+
+<script type="text/javascript">
+	
+</script>
+
+{% endblock %}

@@ -1,0 +1,40 @@
+<div class="row question-parent">
+  <div class="col-md-10 col-md-offset-1">
+    <div class="panel panel-primary">
+      <div class="panel-heading delete-if-empty">
+        <h3 id="p_title" class="TAKE_ONLY wp-pair-text"></h3>
+        <div class="EDIT_ONLY input-group">
+          <input type="text" id="title" class="form-control wp-pair-input" placeholder="Element Title" onchange="textChange(this)">
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-trash delete-header" />
+          </span>
+        </div>
+      </div>
+      {% block answer_details %}
+      {% endblock %}
+      <div class="panel-footer EDIT_ONLY">
+        <div style="height:33px;display:inline-block;">
+          <button type="button" class="delete-question btn btn-danger pull-left">Delete Element</button>
+          &nbsp;&nbsp;<input type="checkbox" name="my-checkbox" checked data-on-text="Graded" data-off-text="Not Graded" data-handle-width="110">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% block js_bottom %}
+{% endblock %}
+<script src="/static/bootstrap-switch/dist/js/bootstrap-switch.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+  applyQuestionJS();
+  $.fn.bootstrapSwitch.defaults.size = 'small';
+  $("[name='my-checkbox']").bootstrapSwitch();
+  $('input[name="my-checkbox"]').on('switchChange.bootstrapSwitch', function(event, state) {
+    $(this).closest('.panel-primary').find('.panel-body').toggleClass('not-graded', !state);
+    if (!state){
+      $(this).closest('.panel-primary').find('.wp-supp-input').val("");
+    }
+    hideAnswerKeyAlertIfAppropriate();
+  });
+});
+</script>

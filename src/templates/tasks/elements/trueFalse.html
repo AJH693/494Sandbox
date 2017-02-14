@@ -1,0 +1,33 @@
+{% extends "tasks/elements/layout-question.html" %}
+{% block answer_details %}
+  <div class="panel-body automatic-grading question" id="notSet">
+    <div>
+      <textarea id="body" class="form-control EDIT_ONLY" placeholder="Question Content" onchange="textChange(this)"></textarea>
+      <p id="p_body" class="TAKE_ONLY question-content"></p>
+      <hr>
+    </div>
+    <div class="input-group">
+      <span class="input-group-addon"> <input type="radio" name="tf" id="true" onchange="hideAnswerKeyAlertIfAppropriate()"> </span>
+      <p class="form-control">True</p>
+    </div>
+    <br>
+    <div class="input-group">
+      <span class="input-group-addon"> <input type="radio" name="tf" id="false" onchange="hideAnswerKeyAlertIfAppropriate()"> </span>
+      <p class="form-control">False</p>
+    </div>
+  </div>
+{% endblock %}
+{% block js_bottom %}
+<script type="text/javascript">
+  $(document).ready(function(){
+    // force the ID to be set in this document.ready
+    var tfID = getNextID("question");
+    $("#notSet").attr("id", tfID);
+    $("#true").prop("name", "tf-" + tfID)
+    $("#false").prop("name", "tf-" + tfID)
+
+    $('#true').attr('id', getNextID('choice'));
+    $('#false').attr('id', getNextID('choice'));
+  });
+</script>
+{% endblock %}

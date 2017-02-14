@@ -1,0 +1,191 @@
+{% extends "layout.html" %}
+{% block header_css %}
+<head>
+    <title>Response View</title>
+    {{ super() }}
+</head>
+{% endblock %}
+{% block body %}
+<br>
+<div class="row">
+  <div class="col-md-2 vertical-line">
+      <h4>Summary</h4>
+      Student: <p class="text-muted">{{ student.name }}</p>
+      Student Email: <p class="text-muted">{{ student.email }}</p>
+      Task Title: <p class="text-muted">{{ task.title }}</p>
+      Date of Response: <p class="text-muted">{{ time }}</p>
+      Correctness Grade: <p id="correctnessGrade" class="text-muted">{{task_response.correctness_grade}}%</p>
+      Cognitive Grade: <p class="text-muted">{{task_response.cognitive_grade}}%</p>
+      {% if permissions > 10%}
+      <form action='/response/{{task_response.id}}/export' class='form-inline'>
+          <button id="export" type="submit" class="btn btn-default">Export Response Data</button>
+      </form>
+      {% endif %}
+  </div>
+  {% if permissions > 10 %}
+  <div class="col-md-5 vertical-line">
+  {% else %}
+  <div class="col-md-8 vertical-line">
+  {% endif %}
+      <h4>Manual Grading Required</h4>
+      {% for manual_question in response['manual_questions'] %}
+        {% if (manual_question['correctness'] > 60 and manual_question['critical'] is not none) or manual_question['not-graded'] %}
+        <div class="panel panel-success">
+        {% elif manual_question['correctness'] >= 0 and manual_question['critical'] is not none %}
+        <div class="panel panel-danger">
+        {% else %}
+        <div class="panel panel-warning">
+        {% endif %}
+          <div class="panel-heading">{{manual_question['questionID']}}{% if manual_question['not-graded'] %} - Not Included in Grade{% endif %}</div>
+          <div class="panel-body">
+            Question Content: {{manual_question['questionContent']}}<br>
+            Response: {{manual_question['response']}}<br>
+            {% if not manual_question['not-graded'] %}
+            <form class="form-inline"><div class="form-group"><label style="font-weight: normal">Correctness (0-100):  </label><input type="text" size="3" {% if permissions <= 10 %}disabled{% endif %} class="form-control" onkeyup="markCorrectness(this, {{ (manual_question['critical'] is not none)|int }})" placeholder="{% if manual_question['correctness'] >= 0 %}{{manual_question['correctness']}}{% else %} {% endif %}"></div></form><br>
+            {% endif %}
+            <div class="manual-radio">
+              {% if permissions > 10 and not manual_question['not-graded'] %}
+              <div class="radio">
+                <label class="radio-inline"><input type="radio" {% if manual_question['critical'] %}checked{% endif %} onclick="markCritical(true, this, {{manual_question['correctness']}})">Critical Thinking</label>
+                <label class="radio-inline"><input type="radio" {% if manual_question['critical'] == False %}checked{% endif %} onclick="markCritical(false, this, {{manual_question['correctness']}})">Simple Response</label>
+              </div>
+              {% endif %}
+            </div><br>
+            <div class="form-group">
+              <label for="feedback">Feedback:</label>
+              <textarea rows="4" cols="50" class="form-control" id="feedback" onkeyup="updateFeedback(this)" {% if permissions <= 10 %}disabled{% endif %}>{{manual_question['feedback']}}</textarea>
+            </div>
+          </div>
+        </div>
+      {% endfor %}<br>
+      <h4>Automatically Graded</h4>
+      {% for automatic_question in response['automatic_questions'] %}
+        <div class="panel {% if automatic_question['correct'] %}panel-success{% else %}panel-danger{% endif %}">
+          <div class="panel-heading">{{automatic_question['questionID']}}{% if automatic_question['not-graded'] %} - Not Included in Grade{% endif %}</div>
+          <div class="panel-body">
+            Question Content: {{automatic_question['questionContent']}}<br>
+            Correct Answer: {{automatic_question['correctOptionText']}}<br>
+            Response: {{automatic_question['selectedOptionText']}}<br>
+          </div>
+        </div>
+      {% endfor %}
+  </div>
+  {% if permissions > 10 %}
+  <div class="col-md-5 vertical-line">
+      <h4>Supplementary Material</h4>
+      {% for supp in supplementary %}
+        <div class="panel {% if supp['sufficient'] %}panel-success{% else %}panel-danger{% endif %}">
+          <div class="panel-heading">{{supp['title']}}</div>
+          <div class="panel-body">
+            ID: {{supp['id']}}<br>
+            Title: {{supp['title']}}<br>
+            Time: {{ '%s seconds' % supp['time'] if supp['time'] else 'Did not view' }}<br>
+            Expected Time: {{supp['expected_time']}} seconds
+          </div>
+        </div>
+      {% endfor %}<br>
+
+      {% if supplementaryOrder %}  
+      <div id="supplementaryOrder">
+      <h4>Order of Supplementary Information Clicked</h4>
+      {% for suppOrder in supplementaryOrder%}
+        {{suppOrder}}<br>
+      {% endfor %}
+      </div>
+      {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block js_bottom %}
+{{ super() }}
+<script type="text/javascript">
+
+  $( document ).ready(function() {    
+      $(".manual-radio" ).each(function( index ) {
+      $(this).find('input').attr('name', String(index));
+    });
+  })
+
+  function markCritical(critical, button, correctness){
+      var heading = $(button).closest('.panel-body').prev('.panel-heading');
+      var questionID = heading.text();
+      var data = {};
+      var responseID = document.URL.split("/").pop();
+      data['question_id'] = questionID;
+      data['critical'] = critical;
+      data['response_id'] = responseID;
+      $.ajax({
+            type: 'POST',
+            url: '{{ url_for("grade_manually_critical")}}',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(data) {
+              if (correctness > 60){
+                heading.parent().toggleClass("panel-success", true);
+                heading.parent().toggleClass("panel-danger", false);
+                heading.parent().toggleClass("panel-warning", false);
+              }
+              else if (correctness > 0){
+                heading.parent().toggleClass("panel-success", false);
+                heading.parent().toggleClass("panel-danger", true);
+                heading.parent().toggleClass("panel-warning", false);
+              }
+            }
+        });
+  }
+
+  function updateFeedback(input){
+      var heading = $(input).closest('.panel-body').prev('.panel-heading');
+      var questionID = heading.text();
+      var data = {};
+      var responseID = document.URL.split("/").pop();
+      data['question_id'] = questionID;
+      var feedback = $(input).val();
+      console.log(feedback);
+      console.log(questionID);
+      data['feedback'] = feedback;
+      data['response_id'] = responseID;
+      $.ajax({
+            type: 'POST',
+            url: '{{ url_for("grade_manually_feedback")}}',
+            contentType: 'application/json',
+            data: JSON.stringify(data)
+        });
+  }
+
+  function markCorrectness(input, criticalFilled){
+      var heading = $(input).closest('.panel-body').prev('.panel-heading');
+      var questionID = heading.text();
+      var data = {};
+      var responseID = document.URL.split("/").pop();
+      data['question_id'] = questionID;
+      var correctness = parseInt($(input).val());
+      data['correct'] = correctness;
+      data['response_id'] = responseID;
+      $.ajax({
+            type: 'POST',
+            url: '{{ url_for("grade_manually")}}',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(data) {
+              $("#correctnessGrade").text(data + "%");
+              if (Boolean(criticalFilled)){
+                heading.parent().toggleClass("panel-warning", false);
+                if (correctness >= 60){
+                  heading.parent().toggleClass("panel-success", true);
+                  heading.parent().toggleClass("panel-danger", false);
+                  heading.parent().toggleClass("panel-warning", false);
+                }
+                else {
+                  heading.parent().toggleClass("panel-success", false);
+                  heading.parent().toggleClass("panel-danger", true);
+                  heading.parent().toggleClass("panel-warning", false);
+                }
+
+              }
+            }
+        });
+  }
+</script>
+{% endblock %}

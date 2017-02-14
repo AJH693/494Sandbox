@@ -1,0 +1,9 @@
+{% extends "tasks/elements/layout-question.html" %}
+{% block answer_details %}
+  <div class="panel-body">
+    <div>
+      <textarea id="body" class="form-control EDIT_ONLY" placeholder="Text Content" onchange="textChange(this)"></textarea>
+      <p id="p_body" class="TAKE_ONLY question-content"></p>
+    </div>
+  </div>
+{% endblock %}

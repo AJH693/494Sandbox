@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block header_css %}
+<head>
+    <title>Course</title>
+    {{ super() }}
+</head>
+{% endblock %}
+{% block body %}
+<div class="row">
+    <div class="col-md-10 col-md-offset-2">
+        <div class="page-header">
+            <h1>{{task.title}}</h1>
+            <p class="text-muted">{{course.name}} <small>{{course.title}}</small></p><br>
+            Due Date: {{task.duedate}}<br>
+            <p id="status">Status: {{task.status.capitalize()}}</p>
+            <form action='/task/{{task.id}}/export' class='form-inline'>
+              <button id="export" type="submit" class="btn btn-default">Export Task Data</button>
+              {% if task.status == "created" %}
+              <button id="status_button" type="button" class="btn btn-default" onclick="transition('available')">Make Available to Students</button>
+              {% elif task.status == "available" %}
+              <button id="status_button" type="button" class="btn btn-default" onclick="transition('closed')">Close to Students</button>
+              {% elif task.status == "closed" %}
+              <button id="status_button" type="button" class="btn btn-default" onclick="transition('grades published')">Publish Grades to Students</button>
+              {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block js_bottom %}
+{{ super() }}
+<script type="text/javascript">
+
+  function transition(status){
+    var data = {};
+    data['task_id'] = "{{task.id}}";
+    data['status'] = status;
+    $.ajax({
+          type: 'POST',
+          url: '{{ url_for("transition_task")}}',
+          contentType: 'application/json',
+          data: JSON.stringify(data),
+          success: function(data) {
+            $('#status').text("Status: " + status.charAt(0).toUpperCase() + status.slice(1));
+            $('#status_button').hide()
+          }
+      });
+  }
+</script>
+{% endblock %}

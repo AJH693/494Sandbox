@@ -1,0 +1,26 @@
+{% extends "tasks/elements/layout-question.html" %}
+{% block answer_details %}
+<div class="panel-body">
+	<div class="EDIT_ONLY col-md-10" align="center">
+		<div class="col-md-3" style="display:inline-block">
+			<p>Block Height</p>
+		</div>
+		<div class="col-md-9" style="display:inline-block">
+			<input type="range" min="20" max="100" value="50" onchange="adjustHeight(this, this.parentNode.parentNode.parentNode)">
+		</div>
+	</div>
+	<div class="col-md-12" align="center">
+		<iframe src="" scrolling="no" frameborder="0" style="height:50%;width:100%;"/>
+	</div>
+	<div class="EDIT_ONLY">
+		<div class="row"/>
+	    <form role="form", action="/upload" method="POST" enctype="multipart/form-data">
+	     	<span class="btn btn-default btn-file">
+	        	Upload File
+	        	<input type="file" name="file_path" class="wp-file-src" onchange="uploadAndEmbedFile(this.parentNode.parentNode)">
+	      	</span>
+	      	<div class="wp-file-text" style="display:inline"></div>
+	    </form>
+	</div>
+</div>
+{% endblock %}

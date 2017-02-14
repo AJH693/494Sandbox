@@ -1,56 +1,22 @@
 *.py[cod]
 settingslocal.py
-
-# Virtual environment
-venv
-
-# Packages
-*.egg
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-__pycache__
-
-pip-log.txt
+src/static/uploads/*
+build-*.zip
+data
+*.db
 
 # unit test & coverage reports
 cover
 .coverage
 .tox
 nosetests.xml
-
-# Vagrant info is all strictly local:
-.vagrant
-
-# Mac Specific ignore
-.DS_Store
-*.swp
-.AppleDouble
-.LSOverride
-Icon
-
-._*
-
-.Trashes
-.Spotlight-V100
-
-# code coverage reports
-cover
 htmlcov
 coverage.xml
 *,cover
 *.db
 
-rosie_lock.txt
+# Mac Specific ignore
+.DS_Store
 
-# Any logs
+# Logs
 *.log

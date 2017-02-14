@@ -1,0 +1,108 @@
+{% include "tasks/taskBuilder.js" %}
+{% include "tasks/tasks_js.js" %}
+{% extends "layout.html" %}
+{% block header_css %}
+<head>
+    <title>Layout Selector</title>
+    {{ super() }}
+    <link href="/static/bootstrap-switch/dist/css/bootstrap-switch.css" rel="stylesheet">
+</head>
+{% endblock %}
+{% block body %}
+<div class="row">
+  <!-- Sidebar -->
+  <div class="col-md-1 EDIT_ONLY" style="position:fixed;overflow-y:auto;height:90%">
+    {% for element in elements %}
+      <div class="element" style="border:2px;border-style:outset;border-radius:5px;text-align:center" data-name="{{ element.name }}" data-filepath="{{ element.filePath }}">
+        {% if element.image %}
+          <img src="{{ element.image }}" style="width:70px;height:70px;border-radius:10px">
+        {% else %}
+          <img src="../static/images/Manda-Pie-Back-To-School-Books.ico" alt="Mountain View" style="width:70px;height:70px">
+        {% endif %}
+        <br>
+        {{ element.name }}
+      </div>
+      <br>
+    {% endfor %}
+  </div>
+
+  <!-- Question List -->
+  <div class="col-md-9 col-md-offset-2" id="questionList">
+    <div id="key_alert" class="alert alert-danger col-md-9" style="display:none;position:fixed;z-index:100" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      Finish the answer key by filling out all radio buttons
+    </div>
+    <div id="file_alert" class="alert alert-danger col-md-9" style="display:none;position:fixed;z-index:100" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      One of the supplementary buttons did not have a file attached to it
+    </div>
+    {% if old_content %}    
+      {{ old_content|safe }}
+    {% else %}
+    <div class="row">
+      <div id="elementWell" class="elementWell EDIT_ONLY" style="border:1px;border-style:dashed;border-radius:5px;height:300px" align="center">
+        <br><br>To begin, drag elements onto the screen.
+      </div>
+    </div>
+    <br>
+    <div class="row">
+        <button type="button" class="btn btn-success btn-lg pull-right TAKE_ONLY PREVIEW_ONLY" style="display:None" onclick="showSubmitModal()">Create Task</button>
+        <p class="pull-right PREVIEW_ONLY">&nbsp;&nbsp;</p>
+        <button type="button" class="btn btn-danger btn-lg pull-right EDIT_ONLY" aria-expanded="false" id="delete-all">Delete All</button>
+        <p class="pull-right PREVIEW_ONLY">&nbsp;&nbsp;</p>
+        <button type="button" class="btn btn-lg btn-success pull-right PREVIEW_ONLY" aria-expanded="false" id="preview">Preview</button>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Submission modal -->
+<div id="submission-modal">
+  <div class="modal fade">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Create Task</h4>
+        </div>
+        <div class="modal-body">
+          <form id="submission-modal-form" onsubmit="submitClicked()">
+            <div class="form-group">
+              <label for="taskTitle">Task Title</label>
+              <input type="text" class="form-control" id="taskTitle" placeholder="Task Title" required>
+            </div>
+            <style>
+              #taskDueDate{z-index:1151 !important;}
+            </style>
+            <div class="form-group">
+              <label for="taskDueDate">Due Date</label><br>
+              <div class="col-xs-6">
+              <input id='taskDueDate' type='text' class="form-control" placeholder="mm/dd/yyyy" required/>
+              </div>
+              <div class="col-xs-6">
+              <input id='taskDueTime' type='text' class="form-control time ui-timepicker-input" placeholder="HH:MM(pm|am)" required/>
+              </div><br><br>
+            </div>
+            <div class="form-group">
+              <label for="taskbuilder_viewable_courses">Associate with Course</label><br>
+              <select id="taskbuilder_viewable_courses" required></select>
+            </div>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> <!-- end submission modal -->
+{% endblock %}
+{% block js_bottom %}
+{{ super() }}
+<link rel="stylesheet" href="{{url_for('static', filename='jquery-ui-1.10.3.custom/development-bundle/themes/smoothness/jquery-ui.css')}}" />
+<script src="{{url_for('static', filename='jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js')}}"></script>
+<script type="text/javascript" src="/static/jquery.timepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/jquery.timepicker.css" />
+
+
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "tasks/elements/layout-question.html" %}
+{% block answer_details %}
+  <div class="panel-body manual-grading question" id="notSet">
+  	<div class="delete-if-empty">
+    	<textarea id="body" class="form-control EDIT_ONLY" placeholder="Question Content" onchange="textChange(this)"></textarea>
+    	<p id="p_body" class="TAKE_ONLY question-content"></p>
+    	<hr>
+    </div>
+    <textarea id="student-response" class="form-control" placeholder="Student Answer Here" onchange="textChange(this)"></textarea><br>
+  </div>
+{% endblock %}
