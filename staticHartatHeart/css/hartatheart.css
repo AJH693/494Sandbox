@@ -1,0 +1,58 @@
+<style>
+.image-block {
+    border: 3px solid white ;
+    background-color: black;
+    padding: 0px;    
+    margin: 0px;
+    height:200px;
+    text-align: center;
+    vertical-align: bottom;
+    display: inline-block;
+    overflow: hidden;
+}
+.image-block > img {
+    width: 100%;
+    height: 100%;
+    font-weight: normal;
+    font-size: 19px;
+    padding-top: 150px;
+    background-color: rgba(3,3,3,0.0);
+    color: rgba(6,6,6,0.0);
+    display: inline-block;
+    overflow: hidden;
+}
+.image-block:hover > p {
+      transform:scale(1.5);
+    -ms-transform:scale(1.5); /* IE 9 */
+    -moz-transform:scale(1.5); /* Firefox */
+    -webkit-transform:scale(1.5); /* Safari and Chrome */
+    -o-transform:scale(1.5); /* Opera */
+}
+
+.tile-section {
+
+  background-color: rgba(139,144,145,.51);
+
+
+}
+
+.img-wrapper {
+    display: inline-block;
+    overflow: hidden;
+}
+
+.tile-top-row {
+  max-height: 350px;
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.tile-top-inner-row {
+  height: 175px;
+  width: 100%;
+  padding-left: 15px;
+  padding-top: 5px;
+
+}
+
+</style>
